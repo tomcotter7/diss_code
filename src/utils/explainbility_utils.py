@@ -1,10 +1,7 @@
-
-def getTargetLayer(model):
-    # get the target layer - last convolutional layer
-    pass
+import tensorflow as tf
 
 
-def gradCAMplusplus(src_image, model):
+def gradCAMplusplus(src_image, model, target_output):
     # run gradCAM++ on an image
     pass
 

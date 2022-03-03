@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Dense, Flatten, Dropout, GlobalAveragePoolin
 import cv2 as cv
 
 
-def build_model(weights):
+def data_augmentation():
 
     data_augmentation = tf.keras.Sequential([
         tf.keras.layers.RandomFlip('horizontal'),
@@ -13,16 +13,19 @@ def build_model(weights):
         tf.keras.layers.Rescaling(1./127.5, offset=-1)
     ])
 
+    return data_augmentation
+
+
+def build_model(training):
+
     base_model = InceptionResNetV2(
         include_top='False', weights='None', input_shape=(512, 512, 3))
-    base_model.trainable = False
+    if training:
+        base_model.trainable = False
     inputs = tf.keras.Input(shape=(512, 512, 3))
     x = data_augmentation(inputs)
     x = base_model(x, training=False)
     x = GlobalAveragePooling2D()(x)
-    x = Flatten(name="flatten")(x)
-    x = Dense(512, activation="relu")(x)
-    x = Dropout(0.3)(x)
     predictions = Dense(3, activation="softmax")(x)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -36,9 +39,7 @@ def build_model(weights):
         metrics=["accuracy"],
     )
 
-    model.load_weights(weights)
-
-    return model
+    return base_model, model
 
 
 def preprocess_data(image_path):
