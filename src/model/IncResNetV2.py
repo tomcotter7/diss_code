@@ -1,4 +1,5 @@
-from incresv2_utils import build_model, preprocess_data
+from model.model_utils import build_model, preprocess_data
+import tensorflow as tf
 import cv2 as cv
 import numpy as np
 
@@ -15,10 +16,9 @@ class IncResNetV2():
 
     # function to run an image through the model
 
-    def run_image(self, image):
-        img = cv.imread(image)
-        img = preprocess_data(img)
-        preds = self.model.predict(img)
-        i = np.argmax(preds[0])
+    def run_image(self, image_path):
+        preprocess_data(image_path)
+        dataset = tf.data.Dataset.list_files(image_path)
+        preds = self.model.predict(dataset)
         # here need to run GradCAM++ on i, self.model, target conv layer
-        return i
+        return preds

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.Models import Model
+from tensorflow.keras.models import Model
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
 from tensorflow.keras.layers import Dense, Flatten, Dropout, GlobalAveragePooling2D
 import cv2 as cv
@@ -41,15 +41,15 @@ def build_model(weights):
     return model
 
 
-def preprocess_data(img):
-    h, w, d = img.shape
+def preprocess_data(image_path):
+    img = crop_image_otsu(image_path)
+    h, w, d = img.size
     aspect_ratio = w / h
     width = 512
     height = int(aspect_ratio * width)
-    points = (width, height)
-    img = crop_image_otsu(img)
-    img = cv.resize(img, points, interpolation=cv.INTER_NEAREST)
-    return img
+    size = (width, height)
+    resized_img = cv.resize(img, size, interpolation=cv.INTER_NEAREST)
+    cv.imwrite(image_path, resized_img)
 
 
 def crop_image_otsu(img):
