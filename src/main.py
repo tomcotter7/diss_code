@@ -1,5 +1,4 @@
-from model.PreTrainedIncResNetV2 import IncResNetV2
-from utils.explainbility_utils import gradCAMplusplus, guidedBackProp
+from model.PreTrainedIncResNetV2 import PreTrainedIncResNetV2
 
 WEIGHTS = "../weights/test_weights.cpkt"
 
@@ -7,10 +6,11 @@ WEIGHTS = "../weights/test_weights.cpkt"
 def main():
 
     image_path = "../images/test.jpg"
-    model = IncResNetV2(WEIGHTS)
-    predictions = model.run_image(image_path)
-
-    return predictions
+    model = PreTrainedIncResNetV2(WEIGHTS)
+    cam = model.run_image(image_path)
+    # visualize heatmap
+    # show next to input image
+    return cam
 
 
 main()

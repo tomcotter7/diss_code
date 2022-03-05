@@ -1,31 +1,25 @@
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-from tensorflow.keras.layers import Dense, Flatten, Dropout, GlobalAveragePooling2D
+from tensorflow.keras.layers import Dense, Dropout, GlobalAveragePooling2D
 import cv2 as cv
-
-
-def data_augmentation():
-
-    data_augmentation = tf.keras.Sequential([
-        tf.keras.layers.RandomFlip('horizontal'),
-        tf.keras.layers.RandomRotation(0.3),
-        tf.keras.layers.Rescaling(1./127.5, offset=-1)
-    ])
-
-    return data_augmentation
 
 
 def build_model(training):
 
+    inputs = tf.keras.Input(shape=(512, 512, 3))
     base_model = InceptionResNetV2(
-        include_top='False', weights='None', input_shape=(512, 512, 3))
+        include_top='False', weights='None',
+        input_shape=(512, 512, 3), input_tensor=inputs)
     if training:
         base_model.trainable = False
-    inputs = tf.keras.Input(shape=(512, 512, 3))
-    x = data_augmentation(inputs)
-    x = base_model(x, training=False)
-    x = GlobalAveragePooling2D()(x)
+
+    target_conv_layer = list(filter(lambda x: isinstance(
+                           x, tf.keras.layers.Conv2D), base_model.layers))[-1].name
+
+    conv_layer = base_model.get_layer(target_conv_layer)
+    x = GlobalAveragePooling2D()(conv_layer.output)
+    x = Dropout(0.3)(x)
     predictions = Dense(3, activation="softmax")(x)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -42,18 +36,16 @@ def build_model(training):
     return base_model, model
 
 
-def preprocess_data(image_path):
-    img = crop_image_otsu(image_path)
-    h, w, d = img.size
-    aspect_ratio = w / h
-    width = 512
-    height = int(aspect_ratio * width)
-    size = (width, height)
-    resized_img = cv.resize(img, size, interpolation=cv.INTER_NEAREST)
-    cv.imwrite(image_path, resized_img)
+def preprocess_data_for_grad_cam(img_path):
+    img = cv.imread(img_path)
+    img = crop_image_otsu(img)
+    resized_img = cv.resize(img, (512, 512), interpolation=cv.INTER_LINEAR)
+    cv.imwrite(img_path, resized_img)
+    return img
 
 
 def crop_image_otsu(img):
+
     grayscale = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     _, thresholded = cv.threshold(grayscale, 0, 255, cv.THRESH_OTSU)
     bbox = cv.boundingRect(thresholded)
