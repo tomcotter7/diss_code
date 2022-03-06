@@ -1,9 +1,7 @@
 import tkinter as tk
-from tkinter import PhotoImage, Button, ttk
-import os
-import cv2 as cv
-import time
-from tkinter.filedialog import askopenfile
+from tkinter import Button, ttk
+from tkinter.filedialog import askopenfile, askopenfilename
+from PIL import ImageTk, Image
 
 
 class App:
@@ -13,6 +11,7 @@ class App:
         self.root = tk.Tk()
         self.root.title("Diabetic Retinopathy Detection")
         self.image = ""
+        self.image_path = ""
 
         window_width = 700
         window_height = 550
@@ -29,7 +28,7 @@ class App:
 
         file_upload = ttk.Button(self.root, text="Upload 2D Fundus Image",
                                  command=lambda: self.upload_file())
-        file_upload.grid()
+        file_upload.pack()
 
         self.root.resizable(False, False)
 
@@ -42,10 +41,11 @@ class App:
         file_path = askopenfile(mode='r', filetypes=[('Image Files', '*jpeg')])
         if file_path is not None:
             pass
-        print("Selected:", file_path)
-        output = tk.Label(self.root, text=file_path.name)
-        output.grid()
-        self.image = file_path.name
+        self.image_path = file_path.name
+        self.image = ImageTk.PhotoImage(Image.open(self.image_path))
+
+        output = tk.Label(self.root, text=file_path, image=self.image)
+        output.pack()
 
 
 new_app = App()
