@@ -1,10 +1,44 @@
 import tensorflow as tf
 import numpy as np
+import cv2 as cv
+from PIL import Image
 
 # run gradCAM++ on an input image and trained model
 
 
-def gradCAMplusplus(img, model, layer_name):
+def preprocess_data_for_grad_cam(img_path):
+    img = cv.imread(img_path)
+    img = crop_image_otsu(img)
+    resized_img = cv.resize(img, (512, 512), interpolation=cv.INTER_LINEAR)
+    cv.imwrite(img_path, resized_img)
+    return img
+
+
+def crop_image_otsu(img):
+
+    grayscale = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    _, thresholded = cv.threshold(grayscale, 0, 255, cv.THRESH_OTSU)
+    bbox = cv.boundingRect(thresholded)
+    x, y, w, h = bbox
+    foreground = img[y:y+h, x:x+w]
+    return foreground
+
+
+def overlap_heatmap(img_path, heatmap, alpha):
+    img = cv.imread(img_path)
+    heatmap = cv.resize(heatmap, (img.shape[1], img.shape[0]))
+    heatmap = (heatmap*255).astype("uint8")
+    heatmap = cv.applyColorMap(heatmap, cv.COLORMAP_JET)
+    superimposed_img = heatmap * alpha + img
+    superimposed_img = np.clip(superimposed_img, 0, 255).astype("uint8")
+    superimposed_img = cv.cvtColor(superimposed_img, cv.COLOR_BGR2RGB)
+
+    imgwithheat = Image.fromarray(superimposed_img)
+    return imgwithheat
+
+
+def gradCAMplusplus(image_path, model, layer_name):
+    img = np.asarray(preprocess_data_for_grad_cam(image_path))
     img_tensor = np.expand_dims(img, axis=0)
     conv_layer = model.get_layer(layer_name)  # get last conv_layer
     # modify model to let you check the last conv_layer output
@@ -39,14 +73,17 @@ def gradCAMplusplus(img, model, layer_name):
     if max_cam == 0:
         max_cam = 1e-10
     cam /= max_cam
-    return cam
+    cam = (cam*-1.0) + 1.0
+    cam_heatmap = np.array(cv.applyColorMap(np.uint8(255*cam), cv.COLORMAP_JET))
+
+    return cam_heatmap
 
 
-def gradCAM(img, model, layer_name):
+def gradCAM(image_path, model, layer_name):
     # might be worth building a vanilla gradcam implementation to test differences
     pass
 
 
-def guided_backprop(img, model):
-    # although bad, might be worth including just for the visualization element of it
+def createBoxes(heatmap):
+    # maybe create some bounding boxes to show around decision making pixels
     pass

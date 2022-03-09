@@ -1,4 +1,4 @@
-from model.PreTrainedIncResNetV2 import PreTrainedIncResNetV2
+from model.IncResNetV2 import IncResNetV2
 
 WEIGHTS = "../weights/test_weights.cpkt"
 
@@ -6,7 +6,7 @@ WEIGHTS = "../weights/test_weights.cpkt"
 def main():
 
     image_path = "../images/test.jpg"
-    model = PreTrainedIncResNetV2(WEIGHTS)
+    model = IncResNetV2(WEIGHTS, False)
     cam = model.run_image(image_path)
     # visualize heatmap
     # show next to input image
