@@ -10,11 +10,12 @@ class App:
 
         self.root = tk.Tk()
         self.root.title("Diabetic Retinopathy Detection")
+        self.root.config(bg="skyblue")
         self.image = ""
         self.image_path = ""
 
-        window_width = 700
-        window_height = 550
+        window_width = 1000
+        window_height = 850
         # get the screen dimension
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -26,13 +27,26 @@ class App:
         # set the position of the window to the center of the screen
         self.root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
-        file_upload = ttk.Button(self.root, text="Upload 2D Fundus Image",
+        self.left_frame = tk.Frame(self.root, width=450, height=800, bg="grey")
+        self.left_frame.pack(side="left", fill="both", padx=10, pady=10, expand=True)
+
+        self.right_frame = tk.Frame(self.root, width=400, height=800, bg="grey")
+        self.right_frame.pack(side="right", fill="both", padx=10, pady=10, expand=True)
+
+        file_upload = ttk.Button(self.left_frame, text="Upload 2D Fundus Image",
                                  command=lambda: self.upload_file())
-        file_upload.pack()
+        file_upload.pack(fill="both", padx=20, pady=5)
+
+        task_manager = tk.Frame(self.left_frame, width=400, height=300, bg="lightgrey")
+        task_manager.pack(fill="both", padx=5, pady=5)
+
+        run_gpp = ttk.Button(task_manager, text="Produce Heatmap of Anomalies")
+        run_gpp.pack(fill="both", padx=20, pady=5)
+
+        run_pred = ttk.Button(task_manager, text="Predict DR severity level")
+        run_pred.pack(fill="both", padx=20, pady=5)
 
         self.root.resizable(False, False)
-
-        # when loading a file in, root.lower()
 
     def run(self):
         self.root.mainloop()
@@ -44,8 +58,8 @@ class App:
         self.image_path = file_path.name
         self.image = ImageTk.PhotoImage(Image.open(self.image_path))
 
-        output = tk.Label(self.root, text=file_path, image=self.image)
-        output.pack()
+        output = tk.Label(self.left_frame, text=file_path, image=self.image)
+        output.pack(fill="both", padx=5, pady=5)
 
 
 new_app = App()
