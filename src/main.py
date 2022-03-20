@@ -1,16 +1,18 @@
 from model.IncResNetV2 import IncResNetV2
+from frontend import App
 
-WEIGHTS = "../weights/test_weights.cpkt"
+
+WEIGHTS = "/home/tcotts/Documents/uni-work/year3/dissertation/diss_code/weights/dbest_save_at_34.ckpt.index"
 
 
 def main():
 
-    image_path = "../images/test.jpg"
-    model = IncResNetV2(WEIGHTS, False)
-    cam = model.run_image(image_path)
+    model = IncResNetV2(WEIGHTS, True)
+    app = App(model)
+    app.run()
+
     # visualize heatmap
     # show next to input image
-    return cam
 
 
 main()

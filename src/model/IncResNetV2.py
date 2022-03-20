@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, GlobalAveragePooling2D
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2
-from utils.explainbility_utils import gradCAMplusplus, overlap_heatmap
 
 
 class IncResNetV2():
@@ -14,7 +13,7 @@ class IncResNetV2():
         self.last_conv = list(filter(lambda x: isinstance(
             x, tf.keras.layers.Conv2D), self.model.layers))[-1].name
         if not training:
-            self.full_model.load_weights(weights)
+            self.model.load_weights(weights)
         self.cam = None
         self.history = None
         self.history_fine = None
@@ -34,9 +33,14 @@ class IncResNetV2():
 
     def __build_model(self, training):
         inputs = tf.keras.Input(shape=(512, 512, 3))
-        base_model = InceptionResNetV2(
-            include_top='False', weights='None',
-            input_shape=(512, 512, 3), input_tensor=inputs)
+        if training:
+            base_model = InceptionResNetV2(
+                include_top=False, weights='imagenet',
+                input_shape=(512, 512, 3), input_tensor=inputs)
+        else:
+            base_model = InceptionResNetV2(
+                include_top=False, weights=None,
+                input_shape=(512, 512, 3), input_tensor=inputs)
         if training:
             base_model.trainable = False
 
@@ -71,7 +75,3 @@ class IncResNetV2():
                                             learning_rate=self.base_lr/10),
                            loss="sparse_categorical_crossentropy",
                            metrics=["accuracy"])
-
-    def run_gradcam_pp(self, image_path):
-        self.heatmap = gradCAMplusplus(image_path, self.model, self.last_conv)
-        self.overlayed_image = overlap_heatmap(image_path, self.heatmap, 0.3)

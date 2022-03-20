@@ -1,7 +1,8 @@
-import tensorflow as tf
 import numpy as np
 import cv2 as cv
 from PIL import Image
+import tensorflow as tf
+import os
 
 # run gradCAM++ on an input image and trained model
 
@@ -25,10 +26,12 @@ def crop_image_otsu(img):
 
 
 def overlap_heatmap(img_path, heatmap, alpha):
+    print(heatmap)
     img = cv.imread(img_path)
     heatmap = cv.resize(heatmap, (img.shape[1], img.shape[0]))
     heatmap = (heatmap*255).astype("uint8")
     heatmap = cv.applyColorMap(heatmap, cv.COLORMAP_JET)
+    print(heatmap.shape)
     superimposed_img = heatmap * alpha + img
     superimposed_img = np.clip(superimposed_img, 0, 255).astype("uint8")
     superimposed_img = cv.cvtColor(superimposed_img, cv.COLOR_BGR2RGB)

@@ -1,20 +1,23 @@
 import tkinter as tk
-from tkinter import Button, ttk
-from tkinter.filedialog import askopenfile, askopenfilename
+from tkinter import ttk
+from tkinter.filedialog import askopenfile
 from PIL import ImageTk, Image
+from utils.explainbility_utils import gradCAMplusplus, overlap_heatmap
 
 
 class App:
 
-    def __init__(self):
+    def __init__(self, model):
 
         self.root = tk.Tk()
         self.root.title("Diabetic Retinopathy Detection")
         self.root.config(bg="skyblue")
         self.image = ""
         self.image_path = ""
+        self.hm = ""
+        self.model = model
 
-        window_width = 1000
+        window_width = 1500
         window_height = 850
         # get the screen dimension
         screen_width = self.root.winfo_screenwidth()
@@ -40,7 +43,8 @@ class App:
         task_manager = tk.Frame(self.left_frame, width=400, height=300, bg="lightgrey")
         task_manager.pack(fill="both", padx=5, pady=5)
 
-        run_gpp = ttk.Button(task_manager, text="Produce Heatmap of Anomalies")
+        run_gpp = ttk.Button(task_manager, text="Produce Heatmap of Anomalies",
+                             command=lambda: self.run_gpp())
         run_gpp.pack(fill="both", padx=20, pady=5)
 
         run_pred = ttk.Button(task_manager, text="Predict DR severity level")
@@ -61,6 +65,19 @@ class App:
         output = tk.Label(self.left_frame, text=file_path, image=self.image)
         output.pack(fill="both", padx=5, pady=5)
 
+    def run_gpp(self):
+        if self.image != "":
+            heatmap = gradCAMplusplus(
+                self.image_path, self.model.model, self.model.last_conv)
+            overlayed = overlap_heatmap(self.image_path, heatmap, 0.3)
 
-new_app = App()
-new_app.run()
+            self.image_hm = ImageTk.PhotoImage(overlayed)
+            output_text = tk.Label(self.right_frame, text="Areas of caution")
+            output_text.pack(fill="both", padx=5, pady=5)
+            gpp_output = tk.Label(
+                self.right_frame, text="Areas of caution", image=self.image_hm)
+            gpp_output.pack(fill="both", padx=5, pady=5)
+        else:
+            error = tk.Label(self.right_frame,
+                             text="Please select an image before trying anything")
+            error.pack(fill="both", padx=5, pady=5)
