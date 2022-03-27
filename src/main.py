@@ -4,6 +4,10 @@ from frontend import App
 
 WEIGHTS = "/home/tcotts/Documents/uni-work/year3/dissertation/diss_code/weights/dbest_save_at_34.ckpt.index"
 
+# Python application to build a previously trained model, and then produce a Tkinter
+# window that allows the user to input an image and test for Diabetic Retinopathy
+# on said image.
+
 
 def main():
 
@@ -11,9 +15,5 @@ def main():
     app = App(model)
     app.run()
 
-    # visualize heatmap
-    # show next to input image
-
 
 main()
-# also think about here some kind of UI to pass in images
