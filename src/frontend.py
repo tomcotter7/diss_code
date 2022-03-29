@@ -93,6 +93,14 @@ class App:
         else:
             return tk.Label(self.right_frame, text="error!")
 
+    # function to allow the user to save the output images
+    def save_images(self):
+        pass
+
+    # function to be completed once I can get time data, but I'll just show the premise
+    def future_images(self):
+        pass
+
     # function to run the gradcam++ algorithm on an input image
     def run_gpp(self):
         for widget in self.right_frame.winfo_children():
