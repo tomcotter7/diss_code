@@ -6,6 +6,7 @@ from utils.explainbility_utils import gradCAMplusplus, overlap_heatmap
 import imghdr
 import cv2 as cv
 import pathlib
+import tkinter.font as tkFont
 
 
 # Python class to hold the Tkinter window and let the user interact with it.
@@ -20,6 +21,10 @@ class App:
         self.image_path = ""
         self.hm = ""
         self.model = model
+        self.style = ttk.Style()
+        self.style.configure('my.TButton', font=('Arial', 20))
+        self.customFont = tkFont.Font(family="Arial", size=16)
+        self.customBoldFont = tkFont.Font(family="Arial", size=16, weight=tkFont.BOLD)
 
         window_width = 1500
         window_height = 800
@@ -48,11 +53,11 @@ class App:
         self.image_frame.pack(fill="both", padx=5, pady=5)
 
         file_upload = ttk.Button(task_manager, text="Upload 2D Fundus Image",
-                                 command=lambda: self.upload_file())
+                                 command=lambda: self.upload_file(), style='my.TButton')
         file_upload.pack(fill="both", padx=20, pady=5)
 
         run_gpp = ttk.Button(task_manager, text="Run AI",
-                             command=lambda: self.run_gpp())
+                             command=lambda: self.run_gpp(), style='my.TButton')
         run_gpp.pack(fill="both", padx=20, pady=5)
 
         self.root.resizable(False, False)
@@ -76,7 +81,8 @@ class App:
         file = askopenfile(mode='r', filetypes=[
                            ('Image Files', '*.jpeg'), ('All files', '*.*')])
         if not self.file_correct(file):
-            output = tk.Label(self.image_frame, text="Please upload a image", bg="red")
+            output = tk.Label(self.image_frame, text="Please upload a image",
+                              bg="red", font=self.customFont)
         else:
             self.image_path = file.name
             cv_img = cv.cvtColor(cv.imread(self.image_path), cv.COLOR_BGR2RGB)
@@ -84,7 +90,7 @@ class App:
 
             output = tk.Label(self.image_frame, text=file, image=self.image)
 
-        file_name = tk.Label(self.image_frame, text=self.image_path)
+        file_name = tk.Label(self.image_frame, text=self.image_path, font=self.customFont)
         file_name.pack(fill="both", padx=5, pady=5)
         output.pack(fill="both", padx=5, pady=5)
 
@@ -94,17 +100,17 @@ class App:
         if cls == 0:
             return tk.Label(self.right_frame,
                             text="This eye is unlikely to have symptoms of D.R",
-                            bg="green")
+                            bg="green", font=self.customBoldFont)
         elif cls == 1:
             return tk.Label(self.right_frame,
                             text="This eye has symptoms of non-profilerative D.R",
-                            bg="orange")
+                            bg="orange", font=self.customBoldFont)
         elif cls == 2:
             return tk.Label(self.right_frame,
                             text="This eye has symptoms of profilerative D.R, take immediate action",
-                            bg="red")
+                            bg="red", font=self.customBoldFont)
         else:
-            return tk.Label(self.right_frame, text="error!")
+            return tk.Label(self.right_frame, text="error!", font=self.customFont)
 
     # function to allow the user to save the output images
     def save_images(self):
@@ -120,7 +126,7 @@ class App:
         print(type(new_name_hm))
 
         dir_label = tk.Label(
-            self.right_frame, text="images have been saved to " + str(folder))
+            self.right_frame, text="images have been saved to " + str(folder), font=self.customFont)
         dir_label.pack(fill="both", padx=5, pady=5)
 
         ImageTk.getimage(self.image_box).convert('RGB').save(str(new_name_box), "JPEG")
@@ -131,7 +137,7 @@ class App:
     def run_gpp(self):
         for widget in self.right_frame.winfo_children():
             widget.destroy()
-        file_name = tk.Label(self.right_frame, text=self.image_path)
+        file_name = tk.Label(self.right_frame, text=self.image_path, font=self.customFont)
         file_name.pack(fill="both", padx=5, pady=5)
         if self.image != "":
             heatmap, output = gradCAMplusplus(
@@ -141,7 +147,8 @@ class App:
 
                 self.image_hm = ImageTk.PhotoImage(overlayed)
                 self.image_box = ImageTk.PhotoImage(boxes)
-                output_text = tk.Label(self.right_frame, text="Areas of caution")
+                output_text = tk.Label(
+                    self.right_frame, text="Areas of caution", font=self.customBoldFont)
                 output_text.pack(fill="both", padx=5, pady=5)
                 gpp_output = tk.Label(
                     self.right_frame, text="output image", image=self.image_hm)
@@ -151,7 +158,7 @@ class App:
                 boxes.pack(fill="both", padx=5, pady=5)
                 save_button = ttk.Button(
                     self.right_frame, text="Save Output",
-                    command=lambda: self.save_images())
+                    command=lambda: self.save_images(), style='my.TButton')
                 save_button.pack(fill="both", padx=5, pady=5)
             text_output = self.getCorrectDR(output)
             text_output.pack(fill="both", padx=5, pady=5)
@@ -159,5 +166,5 @@ class App:
         else:
             error = tk.Label(self.right_frame,
                              text="Please select an image before trying anything",
-                             bg="red")
+                             bg="red", font=self.customFont)
             error.pack(fill="both", padx=5, pady=5)
