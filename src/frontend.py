@@ -4,6 +4,8 @@ from tkinter.filedialog import askopenfile
 from PIL import ImageTk, Image
 from utils.explainbility_utils import gradCAMplusplus, overlap_heatmap
 import imghdr
+import cv2 as cv
+import pathlib
 
 
 # Python class to hold the Tkinter window and let the user interact with it.
@@ -20,7 +22,7 @@ class App:
         self.model = model
 
         window_width = 1500
-        window_height = 1200
+        window_height = 800
         # get the screen dimension
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -38,12 +40,16 @@ class App:
         self.right_frame = tk.Frame(self.root, width=400, height=800, bg="grey")
         self.right_frame.pack(side="right", fill="both", padx=10, pady=10, expand=True)
 
-        file_upload = ttk.Button(self.left_frame, text="Upload 2D Fundus Image",
-                                 command=lambda: self.upload_file())
-        file_upload.pack(fill="both", padx=20, pady=5)
-
         task_manager = tk.Frame(self.left_frame, width=400, height=300, bg="lightgrey")
         task_manager.pack(fill="both", padx=5, pady=5)
+
+        self.image_frame = tk.Frame(self.left_frame, width=400,
+                                    height=500, bg="grey")
+        self.image_frame.pack(fill="both", padx=5, pady=5)
+
+        file_upload = ttk.Button(task_manager, text="Upload 2D Fundus Image",
+                                 command=lambda: self.upload_file())
+        file_upload.pack(fill="both", padx=20, pady=5)
 
         run_gpp = ttk.Button(task_manager, text="Run AI",
                              command=lambda: self.run_gpp())
@@ -58,26 +64,33 @@ class App:
         if file_path is None:
             return False
         elif imghdr.what(file_path.name) is None:
+            print("imghdr failed")
             return False
 
         return True
 
     # function to allow the user to open a file
     def upload_file(self):
+        for widget in self.image_frame.winfo_children():
+            widget.destroy()
         file = askopenfile(mode='r', filetypes=[
                            ('Image Files', '*.jpeg'), ('All files', '*.*')])
         if not self.file_correct(file):
-            output = tk.Label(self.right_frame, text="Please upload a image", bg="red")
+            output = tk.Label(self.image_frame, text="Please upload a image", bg="red")
         else:
             self.image_path = file.name
-            self.image = ImageTk.PhotoImage(Image.open(self.image_path))
+            cv_img = cv.cvtColor(cv.imread(self.image_path), cv.COLOR_BGR2RGB)
+            self.image = ImageTk.PhotoImage(image=Image.fromarray(cv_img))
 
-            output = tk.Label(self.left_frame, text=file, image=self.image)
+            output = tk.Label(self.image_frame, text=file, image=self.image)
+
+        file_name = tk.Label(self.image_frame, text=self.image_path)
+        file_name.pack(fill="both", padx=5, pady=5)
         output.pack(fill="both", padx=5, pady=5)
 
     # function to return a label based on the class predicted by the model
+
     def getCorrectDR(self, cls):
-        print(type(cls))
         if cls == 0:
             return tk.Label(self.right_frame,
                             text="This eye is unlikely to have symptoms of D.R",
@@ -95,16 +108,31 @@ class App:
 
     # function to allow the user to save the output images
     def save_images(self):
-        pass
 
-    # function to be completed once I can get time data, but I'll just show the premise
-    def future_images(self):
-        pass
+        path = pathlib.PurePath(self.image_path)
+        parent_path = path.parents[1]
+        name = str(path.name)
+        folder = parent_path.joinpath('outputs')
+
+        new_name_box = folder / (name.split(".")[0] + "_box.jpg")
+        new_name_hm = folder / (name.split(".")[0] + "_hm.jpg")
+        print(new_name_box)
+        print(type(new_name_hm))
+
+        dir_label = tk.Label(
+            self.right_frame, text="images have been saved to " + str(folder))
+        dir_label.pack(fill="both", padx=5, pady=5)
+
+        ImageTk.getimage(self.image_box).convert('RGB').save(str(new_name_box), "JPEG")
+        ImageTk.getimage(self.image_hm).convert('RGB').save(str(new_name_hm), "JPEG")
 
     # function to run the gradcam++ algorithm on an input image
+
     def run_gpp(self):
         for widget in self.right_frame.winfo_children():
             widget.destroy()
+        file_name = tk.Label(self.right_frame, text=self.image_path)
+        file_name.pack(fill="both", padx=5, pady=5)
         if self.image != "":
             heatmap, output = gradCAMplusplus(
                 self.image_path, self.model.model, self.model.last_conv)
@@ -121,6 +149,10 @@ class App:
                 boxes = tk.Label(self.right_frame, text="output image 2",
                                  image=self.image_box)
                 boxes.pack(fill="both", padx=5, pady=5)
+                save_button = ttk.Button(
+                    self.right_frame, text="Save Output",
+                    command=lambda: self.save_images())
+                save_button.pack(fill="both", padx=5, pady=5)
             text_output = self.getCorrectDR(output)
             text_output.pack(fill="both", padx=5, pady=5)
 

@@ -33,16 +33,18 @@ def overlap_heatmap(img_path, heatmap, alpha):
     heatmap = (heatmap*255).astype("uint8")
     heatmap = cv.applyColorMap(heatmap, cv.COLORMAP_HOT)
     boxes = createBoxes(heatmap)
-    boxes_img = boxes * alpha + img
+    boxes_img = boxes * 0.25 + img
     superimposed_img_boxes = np.clip(boxes_img, 0, 255).astype("uint8")
     superimposed_img_boxes = cv.cvtColor(superimposed_img_boxes, cv.COLOR_BGR2RGB)
-
     imgwithboxes = Image.fromarray(superimposed_img_boxes)
+    imgwithboxes = imgwithboxes.resize((256, 256), Image.BILINEAR)
+
     superimposed_img = heatmap * alpha + img
     superimposed_img = np.clip(superimposed_img, 0, 255).astype("uint8")
     superimposed_img = cv.cvtColor(superimposed_img, cv.COLOR_BGR2RGB)
-
     imgwithheat = Image.fromarray(superimposed_img)
+    imgwithheat = imgwithheat.resize((256, 256), Image.BILINEAR)
+
     return imgwithheat, imgwithboxes
 
 
