@@ -8,7 +8,7 @@ My UoN 3rd year project. The aim of the project is build an application that tak
 
 The dataset for this project was obtained from [Kaggle](https://www.kaggle.com/c/diabetic-retinopathy-detection/data). I had to balance the dataset as I ran into problems with the number of No-DR images greatly outnumbering the other classes.
 
-The preprocessing performed was simply an Otsu threshold cropping and resizing the images to be 512x512.
+The preprocessing performed was an Otsu threshold cropping and resizing the images to be 512x512. I also mapped some data augmentation techniques to the defined datasets.
 
 ### Training
 
@@ -19,3 +19,7 @@ I have created this repo to make the code cleaner and easier to understand, howe
 ### Explainabilty
 
 The explainability is performed by gradCAM++, ignoring Guided Backpropagation as it is sub-optimal. Finally, the "explained" image is displayed to the user for download and further analysis.
+
+## Usage
+
+I have included a Makefile for ease of use. ```make run``` executes the application and ```make train``` trains the model with the dataset locations defined in src/training/training.py
