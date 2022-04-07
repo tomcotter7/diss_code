@@ -17,12 +17,14 @@ class App:
         self.root = tk.Tk()
         self.root.title("Diabetic Retinopathy Detection")
         self.root.config(bg="skyblue")
+        self.mutli = False
         self.image = ""
         self.image_path = ""
         self.hm = ""
         self.model = model
         self.style = ttk.Style()
-        self.style.configure('my.TButton', font=('Arial', 20))
+        self.style.configure('my.TButton', font=('Arial', 20),
+                             background="grey", foreground="black")
         self.customFont = tkFont.Font(family="Arial", size=16)
         self.customBoldFont = tkFont.Font(family="Arial", size=16, weight=tkFont.BOLD)
 
@@ -52,9 +54,13 @@ class App:
                                     height=500, bg="grey")
         self.image_frame.pack(fill="both", padx=5, pady=5)
 
-        file_upload = ttk.Button(task_manager, text="Upload 2D Fundus Image",
+        file_upload = ttk.Button(task_manager, text="Upload Single 2D Fundus Image",
                                  command=lambda: self.upload_file(), style='my.TButton')
         file_upload.pack(fill="both", padx=20, pady=5)
+
+        # multi_image = ttk.Button(task_manager, text="Upload Multiple 2d Fundus Images",
+        #                         command=lambda: self.multi_image(), style='my.TButton')
+        # multi_image.pack(fill="both", padx=20, pady=5)
 
         run_gpp = ttk.Button(task_manager, text="Run AI",
                              command=lambda: self.run_gpp(), style='my.TButton')
@@ -64,6 +70,13 @@ class App:
 
     def run(self):
         self.root.mainloop()
+
+    def multi_image(self):
+        # basically, import all the images into an array, and when run ai is clicked, run them all at once.
+        # produce outputs but don't show heatmaps, only the output score, with a view heatmap button ?
+        # we could actually show a progress bar in this case?
+        self.multi = True
+        pass
 
     def file_correct(self, file_path):
         if file_path is None:
