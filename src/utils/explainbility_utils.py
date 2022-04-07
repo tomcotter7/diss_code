@@ -48,6 +48,21 @@ def overlap_heatmap(img_path, heatmap, alpha):
     return imgwithheat, imgwithboxes
 
 
+@tf.function
+def getGradientsDerivatives(model, img_tensor):
+    with tf.GradientTape() as t1:
+        with tf.GradientTape() as t2:
+            with tf.GradientTape() as t3:
+                conv_output, preds = model(img_tensor)
+                class_id = tf.math.argmax(preds[0])
+                output = preds[:, class_id]
+                conv_first_grad = t3.gradient(output, conv_output)
+            conv_second_grad = t2.gradient(conv_first_grad, conv_output)
+        conv_third_grad = t1.gradient(conv_second_grad, conv_output)
+
+    return conv_output, preds, class_id, conv_first_grad, conv_second_grad, conv_third_grad
+
+
 # function to run gradcam++ algorithm
 def gradCAMplusplus(image_path, model, layer_name):
     img = np.asarray(preprocess_data_for_grad_cam(image_path))
@@ -58,6 +73,7 @@ def gradCAMplusplus(image_path, model, layer_name):
 
     # get gradient of final classification score
     # with respect to output of final conv layer
+    """
     with tf.GradientTape() as tape1:
         with tf.GradientTape() as tape2:
             with tf.GradientTape() as tape3:
@@ -70,6 +86,10 @@ def gradCAMplusplus(image_path, model, layer_name):
                 conv_first_grad = tape3.gradient(output, conv_output)
             conv_second_grad = tape2.gradient(conv_first_grad, conv_output)
         conv_third_grad = tape1.gradient(conv_second_grad, conv_output)
+    """
+
+    # measure time to see if this actually improved time or not - also we could probably show the time taken?
+    conv_output, preds, class_id, conv_first_grad, conv_second_grad, conv_third_grad = getGradientsDerivatives(gradModel, img_tensor)
 
     # calculate weights for gradCAM++
     global_sum = np.sum(conv_output, axis=(0, 1, 2))
