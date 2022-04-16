@@ -1,18 +1,18 @@
 
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import numpy as np
 from model.IncResNetV2 import IncResNetV2
-from utils.training_utils import data_augmentation, define_datasets
-from data_preprocessing import run_pp
+from utils.training_utils import define_datasets
+# from training.datapreprocessing import run_pp
 
-src_path = "/content/drive/MyDrive/year3/diss/train/"
-dst_path = "/content/drive/MyDrive/year3/diss/512-train/"
-src_labels = "/content/drive/MyDrive/year3/diss/trainLabels.csv"
+# src_path = "/content/drive/MyDrive/year3/diss/train/"
+dst_path = "images/"
+# src_labels = "/content/drive/MyDrive/year3/diss/trainLabels.csv"
 
 checkpoint_path = "/content/drive/MyDrive/year3/diss/models/dbest_save_at_{epoch}.ckpt"
 
-run_pp(src_path, dst_path, src_labels)
+# this can be called to sort your directory to fit the correct format
+# run_pp(src_path, dst_path, src_labels)
 
 
 def callbacks(chck_path):
@@ -30,8 +30,8 @@ def callbacks(chck_path):
 
 
 model = IncResNetV2(None, True)
-train_ds, val_ds, test_ds = define_datasets(dst_path)
-model.train(train_ds, val_ds, [callbacks()], 25, 10)
+train_ds, val_ds, test_ds = define_datasets(16, dst_path)
+model.train(train_ds, val_ds, [callbacks(checkpoint_path)], 25, 10)
 
 # here show plots for how accuary and loss improved through transfer learning and fine tuning
 

@@ -7,6 +7,8 @@ import imghdr
 import cv2 as cv
 import pathlib
 import tkinter.font as tkFont
+import time
+import tensorflow as tf
 
 
 # Python class to hold the Tkinter window and let the user interact with it.
@@ -17,16 +19,16 @@ class App:
         self.root = tk.Tk()
         self.root.title("Diabetic Retinopathy Detection")
         self.root.config(bg="skyblue")
-        self.mutli = False
         self.image = ""
         self.image_path = ""
         self.hm = ""
         self.model = model
         self.style = ttk.Style()
         self.style.configure('my.TButton', font=('Arial', 20),
-                             background="grey", foreground="black")
+                             background="lightgrey", foreground="black")
         self.customFont = tkFont.Font(family="Arial", size=16)
         self.customBoldFont = tkFont.Font(family="Arial", size=16, weight=tkFont.BOLD)
+        self.generateCAM = tf.function(gradCAMplusplus)
 
         window_width = 1500
         window_height = 800
@@ -58,10 +60,6 @@ class App:
                                  command=lambda: self.upload_file(), style='my.TButton')
         file_upload.pack(fill="both", padx=20, pady=5)
 
-        # multi_image = ttk.Button(task_manager, text="Upload Multiple 2d Fundus Images",
-        #                         command=lambda: self.multi_image(), style='my.TButton')
-        # multi_image.pack(fill="both", padx=20, pady=5)
-
         run_gpp = ttk.Button(task_manager, text="Run AI",
                              command=lambda: self.run_gpp(), style='my.TButton')
         run_gpp.pack(fill="both", padx=20, pady=5)
@@ -70,13 +68,6 @@ class App:
 
     def run(self):
         self.root.mainloop()
-
-    def multi_image(self):
-        # basically, import all the images into an array, and when run ai is clicked, run them all at once.
-        # produce outputs but don't show heatmaps, only the output score, with a view heatmap button ?
-        # we could actually show a progress bar in this case?
-        self.multi = True
-        pass
 
     def file_correct(self, file_path):
         if file_path is None:
@@ -133,16 +124,13 @@ class App:
         name = str(path.name)
         folder = parent_path.joinpath('outputs')
 
-        new_name_box = folder / (name.split(".")[0] + "_box.jpg")
         new_name_hm = folder / (name.split(".")[0] + "_hm.jpg")
-        print(new_name_box)
         print(type(new_name_hm))
 
         dir_label = tk.Label(
             self.right_frame, text="images have been saved to " + str(folder), font=self.customFont)
         dir_label.pack(fill="both", padx=5, pady=5)
 
-        ImageTk.getimage(self.image_box).convert('RGB').save(str(new_name_box), "JPEG")
         ImageTk.getimage(self.image_hm).convert('RGB').save(str(new_name_hm), "JPEG")
 
     # function to run the gradcam++ algorithm on an input image
@@ -153,22 +141,23 @@ class App:
         file_name = tk.Label(self.right_frame, text=self.image_path, font=self.customFont)
         file_name.pack(fill="both", padx=5, pady=5)
         if self.image != "":
+            start = time.time()
             heatmap, output = gradCAMplusplus(
-                self.image_path, self.model.model, self.model.last_conv)
+                self.model.model, self.image_path, self.model.last_conv)
+            end = time.time()
             if heatmap is not None:
-                overlayed, boxes = overlap_heatmap(self.image_path, heatmap, 0.3)
-
+                overlayed = overlap_heatmap(self.image_path, heatmap, 0.4)
+                time_taken = end - start
                 self.image_hm = ImageTk.PhotoImage(overlayed)
-                self.image_box = ImageTk.PhotoImage(boxes)
+                time_text = tk.Label(self.right_frame, text="Neural Network took %0.2f seconds" % (
+                    time_taken), font=self.customFont)
+                time_text.pack(fill="both", padx=5, pady=5)
                 output_text = tk.Label(
                     self.right_frame, text="Areas of caution", font=self.customBoldFont)
                 output_text.pack(fill="both", padx=5, pady=5)
                 gpp_output = tk.Label(
                     self.right_frame, text="output image", image=self.image_hm)
                 gpp_output.pack(fill="both", padx=5, pady=5)
-                boxes = tk.Label(self.right_frame, text="output image 2",
-                                 image=self.image_box)
-                boxes.pack(fill="both", padx=5, pady=5)
                 save_button = ttk.Button(
                     self.right_frame, text="Save Output",
                     command=lambda: self.save_images(), style='my.TButton')

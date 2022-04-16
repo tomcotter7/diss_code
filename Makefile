@@ -4,5 +4,5 @@ run:
 
 
 train:
-	echo "Training (edit directories in src/training/training.py if needed)"
-	python3 src/training/training.py
+	echo "Training (edit directories in src/training.py if needed)"
+	python3 src/training.py
