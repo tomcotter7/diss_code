@@ -128,7 +128,7 @@ class App:
         print(type(new_name_hm))
 
         dir_label = tk.Label(
-            self.right_frame, text="images have been saved to " + str(folder), font=self.customFont)
+            self.right_frame, text="saved to " + str(folder), font=self.customFont)
         dir_label.pack(fill="both", padx=5, pady=5)
 
         ImageTk.getimage(self.image_hm).convert('RGB').save(str(new_name_hm), "JPEG")

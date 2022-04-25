@@ -45,8 +45,6 @@ def overlap_heatmap(img_path, heatmap, alpha):
 
     superimposed_img = heatmap * alpha + img
     superimposed_img = np.clip(superimposed_img, 0, 255).astype("uint8")
-    cv.imshow("sii", superimposed_img)
-    cv.waitKey(0)
 
     superimposed_img = cv.cvtColor(superimposed_img, cv.COLOR_BGR2RGB)
 
@@ -116,8 +114,6 @@ def createBoxes(heatmap):
 
     _, thresh = cv.threshold(heatmap, 35, 255, cv.THRESH_BINARY_INV)
 
-    cv.imshow("thresh", thresh)
-
     # Find the contour of the figure
     contours, hierarchy = cv.findContours(image=thresh,
                                           mode=cv.RETR_EXTERNAL,
@@ -131,13 +127,10 @@ def createBoxes(heatmap):
         new_heatmap.append(new_row)
     new_heatmap = np.asarray(new_heatmap)
     heatmap = (new_heatmap*255).astype("uint8")
-    cv.imshow("blank heatmap", heatmap)
 
     for c in contours:
         x, y, w, h = cv.boundingRect(c)
         cv.rectangle(heatmap, (x, y), (x+w, y+h), (255, 36, 15), 2)
-
-    cv.imshow("bounding box heatmap", heatmap)
 
     height, width = heatmap.shape
     mask = np.zeros((height, width), np.uint8)
@@ -149,9 +142,6 @@ def createBoxes(heatmap):
         thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     x, y, w, h = cv.boundingRect(mask_contours[0])
     crop = masked_data[y:y+h, x:x+w]
-
-    cv.imshow("crop", crop)
-    cv.waitKey(0)
 
     return crop
 
@@ -178,5 +168,4 @@ def gradcam(model, image_path, layer_name):
         max_cam = 1e-10
     cam /= max_cam
     cam = (cam*-1.0) + 1.0
-    return cam
     return cam

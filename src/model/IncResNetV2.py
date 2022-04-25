@@ -36,8 +36,6 @@ class IncResNetV2():
 
     def __build_model(self, training):
 
-        learning_rate = tf.keras.optimizers.schedules.CosineDecayRestarts(
-            initial_learning_rate=0.001, first_decay_steps=1500)
         METRICS = [
             'accuracy',
             tf.keras.metrics.AUC(name='auc'),
@@ -68,7 +66,8 @@ class IncResNetV2():
 
         model = Model(inputs=inputs, outputs=predictions)
 
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+        lr = 0.001
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
                       loss=tf.keras.losses.CategoricalCrossentropy(),
                       metrics=[METRICS])
 
@@ -78,10 +77,12 @@ class IncResNetV2():
 
         self.model.trainable = True
 
-        for layer in self.model.layers[:300]:
+        for layer in self.model.layers[:100]:
             layer.trainable = False
 
-        self.model.compile(optimizer=tf.keras.optimizers.Nadam(
-                                            learning_rate=self.base_lr/10),
+        learning_rate = tf.keras.optimizers.schedules.CosineDecayRestarts(
+            initial_learning_rate=0.001, first_decay_steps=1500)
+        self.model.compile(optimizer=tf.keras.optimizers.Adam(
+                                            learning_rate=learning_rate),
                            loss="sparse_categorical_crossentropy",
                            metrics=["accuracy"])

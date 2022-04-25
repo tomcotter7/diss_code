@@ -1,6 +1,6 @@
 # An explainable method for the detection of Diabetic Retinopathy in 2-D Fundus Images
 
-My UoN 3rd year project. The aim of the project is build an application that takes an input image and produces an output image that highlights the possible symptoms of Diabetic Retinopathy. The accompanying paper is in this repository stored under 20160230_Final_Report.pdf.
+My UoN 3rd year project. The aim of the project is build an application that takes an input image and produces an output image that highlights the possible symptoms of Diabetic Retinopathy. The accompanying paper is in this repository stored under 20160230_dissertation.pdf. The demo video of the working application can be seen in 20160230_demo.mp4.
 
 ## Implementation
 
@@ -12,9 +12,9 @@ The preprocessing performed was an Otsu threshold cropping and resizing the imag
 
 ### Training
 
-All the training was performed on Google Colab, and the final model was saved and downloaded for gradCAM++ implementation. I would recommend doing the same if you would like to train the model on new data. I have included the main.ipynb for ease of use.
+All the training was performed on Google Colab, and the final model was saved and downloaded for gradCAM++ implementation. I would recommend doing the same if you would like to train the model on new data. I have included the explainable_dr_detection.ipynb for ease of use. All that is required is to download the Kaggle dataset from [here](https://www.kaggle.com/competitions/diabetic-retinopathy-detection/overview).
 
-I have created this repo to make the code cleaner and easier to understand, however, as specified all the original training and testing code is within main.ipynb. It is a collection of different techniques to train and test data, so may be hectic. This repo tries to clean it up and show my thoughts in a more organised manner.
+I have created this repo to make the code cleaner and to integrate the deep learning model into the application, however, as specified all the original training and testing code is within explainable_dr_detection.ipynb. It is easy to read and contains the GradCAM++ implementation so if you just want to use that I recommend looking at that.
 
 ### Explainabilty
 
