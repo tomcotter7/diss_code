@@ -18,6 +18,8 @@ Simply change the directory variables to suit your system and then you can resiz
 
 I have created this repo to make the code cleaner and to integrate the deep learning model into the application, however, as specified all the original training and testing code is within explainable_dr_detection.ipynb. It is easy to read and contains the GradCAM++ implementation so if you just want to use that I recommend looking at that.
 
+Pre-loaded weights do exist for the GradCAM++ model, however they exceed the moodle file size limit, so they cannot be uploaded.
+
 ### Explainabilty
 
 The explainability is performed by gradCAM++, ignoring Guided Backpropagation as it is sub-optimal. Finally, the "explained" image is displayed to the user for download and further analysis.
