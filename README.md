@@ -26,8 +26,8 @@ The explainability is performed by gradCAM++, ignoring Guided Backpropagation as
 
 ### Application
 
-Whilst explainable_dr_detection.ipynb contains all the code needed to train and generate the model, this repo also contains code to build a Tkniter application with the deep learning model built into it
+Whilst explainable_dr_detection.ipynb contains all the code needed to train and generate the model, this repo also contains code to build a Tkniter application with the deep learning model built into it.
 
 ## Usage
 
-I have included a Makefile for ease of use. ```make run``` executes the application and ```make train``` trains the model with the dataset locations defined in src/training/training.py
+I have included a Makefile for ease of use. ```make run``` executes the application and ```make train``` trains the model with the dataset locations defined in src/training/training.py.
